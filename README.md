@@ -1,46 +1,107 @@
-# Beginner Cybersecurity Mini-Projects
-As an absolute beginner in cybersecurity who has attempted some easy Capture-The-Flags (CTFs) challenges and TryHackMe labs, I decided to complete some easy cybersecurity projects to gain some hands-on experience.
+# 🛡️ Beginner Cybersecurity Mini‑Projects
 
-Since this repository is a collection of several mini-projects, each directory represents a standalone project that are meant to perform a particular task. Mini-projects range from defensive to offensive cybersecurity, and cover a variety of fundamental concepts such as computer networking, cryptography, exploits, and more.
+This repository is an **improved fork** of an existing cybersecurity learning project.  
+I forked the original work to expand it, modernize certain components, fix issues, and add new features — especially within the keylogger project — while continuing to learn through hands‑on practice.
 
-Some projects are implemented multiple times in different programming languages for learning purposes.
+The goal of this collection is to explore fundamental cybersecurity concepts through small, focused projects ranging from cryptography to network analysis and web vulnerabilities.
 
-## Table of Contents
+Each directory represents an independent mini‑project, and some are implemented in multiple programming languages for learning purposes.
 
-<table>
-  <tr>
-    <th>Title</th>
-    <th>Description</th>
-  </tr>
-  <!-- ===================================================== -->
-  <tr>
-    <td><strong>RSA Algorithm</strong></td>
-    <td>Rivest-Shamir-Adleman (RSA) encryption algorithm from scratch.</td>
-  </tr>
-  <!-- ===================================================== -->
-  <tr>
-    <td><strong>Keylogger</strong></td>
-    <td>A program that captures and records the user's keystrokes.</td>
-  </tr>
-  <!-- ===================================================== -->
-  <tr>
-    <td><strong>Network Sniffer (Packet Sniffer)</strong></td>
-    <td>A basic network scanner that checks the number of devices connected to the user's local network and displays the devices' local IP addresses along with their MAC addresses.</td>
-  </tr>
-  <!-- ===================================================== -->
-  <tr>
-    <td><strong>Phishing Pages</strong></td>
-    <td>An attempt to display oneself as an authentic source in order to steal the credentials of a victim. Opens a webpage and asks the user to enter their credentials. The entered credentials are then logged in a text file.</td>
-  </tr>
-  <!-- ===================================================== -->
-  <tr>
-    <td><strong>Steganography</strong></td>
-    <td>Implements LSB steganography using the "stegano" Python library</td>
-  </tr>
-  <!-- ===================================================== -->
-  <tr>
-    <td><strong>SSTI</strong></td>
-    <td>Emulates Server-side Template Injection (SSTI) using Flask. SSTIs are vulnerabilities that let the attacker inject code into server-side templates. Briefly, the attacker can introduce code that is processed by the server-side template, thereby resulting in remote code execution (RCE).</td>
-  </tr>
-  <!-- ===================================================== -->
-</table>
+---
+
+## 📚 Project Overview
+
+| Project | Description |
+|--------|-------------|
+| **RSA Algorithm** | A from‑scratch implementation of the RSA encryption algorithm (key generation, encryption, decryption). |
+| **Keylogger (Educational)** | An enhanced version of the original keylogger: added encryption, legal warning, time‑limit, secure email handling, and improved structure. Designed strictly for educational and defensive understanding. |
+| **Network Sniffer** | A simple network scanner that identifies devices on the local network (IP + MAC address). |
+| **Phishing Pages** | A pedagogical phishing simulation demonstrating social engineering risks. Credentials entered are logged locally. |
+| **Steganography** | LSB steganography implemented using the Python `stegano` library. |
+| **SSTI** | A demonstration of Server‑Side Template Injection using Flask, showing how template engines can be exploited. |
+
+---
+
+## 🔐 Major Update: Educational Keylogger Improvements
+
+As part of this fork, the **Keylogger** project received a complete overhaul.
+
+### ✔️ Improvements Added
+
+#### 🔒 Security
+- Log encryption using **Fernet (AES)**
+- Secure email sending via **SMTP_SSL**
+- Automatic deletion of the log file after sending
+
+#### ⚖️ Legal & Ethical Compliance
+- Mandatory legal warning at startup
+- Explicit user confirmation required
+- Clear reminders about legal restrictions
+
+#### 🧠 Functional Enhancements
+- Timestamping of every keystroke
+- Full handling of special keys
+- Configurable runtime limit
+- Centralized configuration dictionary (`CONFIG`)
+
+#### 🧹 Code Quality
+- Modular structure
+- Better error handling
+- Clear documentation and comments
+
+---
+
+## 🎯 Learning Objectives
+
+This fork aims to strengthen understanding of:
+
+- Offensive and defensive cybersecurity mechanisms  
+- Common vulnerabilities and how they work  
+- Network analysis and monitoring  
+- Cryptography fundamentals  
+- Python scripting for security  
+- Building a credible cybersecurity portfolio  
+
+---
+
+## ⚠️ Legal Disclaimer
+
+Some projects in this repository (keylogger, phishing, SSTI, etc.) involve sensitive concepts.  
+They are provided **strictly for educational purposes**.
+
+> **Using these tools on any system without explicit consent is illegal.**  
+> Both the original author and the maintainer of this fork disclaim any responsibility for misuse.
+
+---
+
+## 🛠️ Installation
+
+Clone the repository *(bash)*  
+Navigate into the project directory *(bash)*  
+Install dependencies *(bash)*  
+
+---
+
+## 🧪 Running the Projects
+
+Run any project independently *(bash)*  
+
+---
+
+## 📝 Git Commit Convention
+
+Recommended commit message for the keylogger update *(bash)*  
+
+Full workflow *(bash)*  
+
+---
+
+## 📌 Possible Future Enhancements
+
+- Add unit tests  
+- Build a simple IDS/IPS  
+- Implement an educational brute‑forcer  
+- Add a hash‑collision demonstration  
+- Create a small local SIEM  
+
+---
